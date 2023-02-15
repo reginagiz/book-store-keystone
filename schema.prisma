@@ -17,7 +17,6 @@ model User {
   name      String    @default("")
   email     String    @unique @default("")
   password  String
-  order     Order[]   @relation("Order_user")
   createdAt DateTime? @default(now())
 }
 
@@ -48,22 +47,29 @@ model Author {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int     @default(0)
-  product   Book?   @relation("OrderItem_product", fields: [productId], references: [id])
-  productId String? @map("product")
-  order     Order?  @relation("OrderItem_order", fields: [orderId], references: [id])
-  orderId   String? @map("order")
+  id         String    @id @default(cuid())
+  quantity   Int       @default(0)
+  product    Book?     @relation("OrderItem_product", fields: [productId], references: [id])
+  productId  String?   @map("product")
+  customer   Customer? @relation("OrderItem_customer", fields: [customerId], references: [id])
+  customerId String?   @map("customer")
+  order      Order?    @relation("OrderItem_order", fields: [orderId], references: [id])
+  orderId    String?   @map("order")
 
   @@index([productId])
+  @@index([customerId])
   @@index([orderId])
 }
 
 model Order {
-  id     String      @id @default(cuid())
-  user   User?       @relation("Order_user", fields: [userId], references: [id])
-  userId String?     @map("user")
-  cart   OrderItem[] @relation("OrderItem_order")
+  id   String      @id @default(cuid())
+  cart OrderItem[] @relation("OrderItem_order")
+}
 
-  @@index([userId])
+model Customer {
+  id         String      @id @default(cuid())
+  name       String      @default("")
+  email      String      @unique @default("")
+  orderitems OrderItem[] @relation("OrderItem_customer")
+  createdAt  DateTime?   @default(now())
 }

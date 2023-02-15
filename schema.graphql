@@ -6,8 +6,6 @@ type User {
   name: String
   email: String
   password: PasswordState
-  order(where: OrderWhereInput! = {}, orderBy: [OrderOrderByInput!]! = [], take: Int, skip: Int! = 0): [Order!]
-  orderCount(where: OrderWhereInput! = {}): Int
   createdAt: DateTime
 }
 
@@ -29,7 +27,6 @@ input UserWhereInput {
   id: IDFilter
   name: StringFilter
   email: StringFilter
-  order: OrderManyRelationFilter
   createdAt: DateTimeNullableFilter
 }
 
@@ -72,12 +69,6 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
-input OrderManyRelationFilter {
-  every: OrderWhereInput
-  some: OrderWhereInput
-  none: OrderWhereInput
-}
-
 input DateTimeNullableFilter {
   equals: DateTime
   in: [DateTime!]
@@ -105,15 +96,7 @@ input UserUpdateInput {
   name: String
   email: String
   password: String
-  order: OrderRelateToManyForUpdateInput
   createdAt: DateTime
-}
-
-input OrderRelateToManyForUpdateInput {
-  disconnect: [OrderWhereUniqueInput!]
-  set: [OrderWhereUniqueInput!]
-  create: [OrderCreateInput!]
-  connect: [OrderWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -125,13 +108,7 @@ input UserCreateInput {
   name: String
   email: String
   password: String
-  order: OrderRelateToManyForCreateInput
   createdAt: DateTime
-}
-
-input OrderRelateToManyForCreateInput {
-  create: [OrderCreateInput!]
-  connect: [OrderWhereUniqueInput!]
 }
 
 type Book {
@@ -332,6 +309,7 @@ type OrderItem {
   id: ID!
   quantity: Int
   product: Book
+  customer: Customer
   order: Order
 }
 
@@ -346,6 +324,7 @@ input OrderItemWhereInput {
   id: IDFilter
   quantity: IntFilter
   product: BookWhereInput
+  customer: CustomerWhereInput
   order: OrderWhereInput
 }
 
@@ -357,12 +336,19 @@ input OrderItemOrderByInput {
 input OrderItemUpdateInput {
   quantity: Int
   product: BookRelateToOneForUpdateInput
+  customer: CustomerRelateToOneForUpdateInput
   order: OrderRelateToOneForUpdateInput
 }
 
 input BookRelateToOneForUpdateInput {
   create: BookCreateInput
   connect: BookWhereUniqueInput
+  disconnect: Boolean
+}
+
+input CustomerRelateToOneForUpdateInput {
+  create: CustomerCreateInput
+  connect: CustomerWhereUniqueInput
   disconnect: Boolean
 }
 
@@ -380,12 +366,18 @@ input OrderItemUpdateArgs {
 input OrderItemCreateInput {
   quantity: Int
   product: BookRelateToOneForCreateInput
+  customer: CustomerRelateToOneForCreateInput
   order: OrderRelateToOneForCreateInput
 }
 
 input BookRelateToOneForCreateInput {
   create: BookCreateInput
   connect: BookWhereUniqueInput
+}
+
+input CustomerRelateToOneForCreateInput {
+  create: CustomerCreateInput
+  connect: CustomerWhereUniqueInput
 }
 
 input OrderRelateToOneForCreateInput {
@@ -395,7 +387,6 @@ input OrderRelateToOneForCreateInput {
 
 type Order {
   id: ID!
-  user: User
   cart(where: OrderItemWhereInput! = {}, orderBy: [OrderItemOrderByInput!]! = [], take: Int, skip: Int! = 0): [OrderItem!]
   cartCount(where: OrderItemWhereInput! = {}): Int
 }
@@ -409,7 +400,6 @@ input OrderWhereInput {
   OR: [OrderWhereInput!]
   NOT: [OrderWhereInput!]
   id: IDFilter
-  user: UserWhereInput
   cart: OrderItemManyRelationFilter
 }
 
@@ -418,14 +408,7 @@ input OrderOrderByInput {
 }
 
 input OrderUpdateInput {
-  user: UserRelateToOneForUpdateInput
   cart: OrderItemRelateToManyForUpdateInput
-}
-
-input UserRelateToOneForUpdateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
-  disconnect: Boolean
 }
 
 input OrderUpdateArgs {
@@ -434,13 +417,58 @@ input OrderUpdateArgs {
 }
 
 input OrderCreateInput {
-  user: UserRelateToOneForCreateInput
   cart: OrderItemRelateToManyForCreateInput
 }
 
-input UserRelateToOneForCreateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
+type Customer {
+  id: ID!
+  name: String
+  email: String
+  orderitems(where: OrderItemWhereInput! = {}, orderBy: [OrderItemOrderByInput!]! = [], take: Int, skip: Int! = 0): [OrderItem!]
+  orderitemsCount(where: OrderItemWhereInput! = {}): Int
+  createdAt: DateTime
+}
+
+input CustomerWhereUniqueInput {
+  id: ID
+  email: String
+}
+
+input CustomerWhereInput {
+  AND: [CustomerWhereInput!]
+  OR: [CustomerWhereInput!]
+  NOT: [CustomerWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  email: StringFilter
+  orderitems: OrderItemManyRelationFilter
+  createdAt: DateTimeNullableFilter
+}
+
+input CustomerOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  email: OrderDirection
+  createdAt: OrderDirection
+}
+
+input CustomerUpdateInput {
+  name: String
+  email: String
+  orderitems: OrderItemRelateToManyForUpdateInput
+  createdAt: DateTime
+}
+
+input CustomerUpdateArgs {
+  where: CustomerWhereUniqueInput!
+  data: CustomerUpdateInput!
+}
+
+input CustomerCreateInput {
+  name: String
+  email: String
+  orderitems: OrderItemRelateToManyForCreateInput
+  createdAt: DateTime
 }
 
 """
@@ -479,6 +507,12 @@ type Mutation {
   updateOrders(data: [OrderUpdateArgs!]!): [Order]
   deleteOrder(where: OrderWhereUniqueInput!): Order
   deleteOrders(where: [OrderWhereUniqueInput!]!): [Order]
+  createCustomer(data: CustomerCreateInput!): Customer
+  createCustomers(data: [CustomerCreateInput!]!): [Customer]
+  updateCustomer(where: CustomerWhereUniqueInput!, data: CustomerUpdateInput!): Customer
+  updateCustomers(data: [CustomerUpdateArgs!]!): [Customer]
+  deleteCustomer(where: CustomerWhereUniqueInput!): Customer
+  deleteCustomers(where: [CustomerWhereUniqueInput!]!): [Customer]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -517,6 +551,9 @@ type Query {
   orders(where: OrderWhereInput! = {}, orderBy: [OrderOrderByInput!]! = [], take: Int, skip: Int! = 0): [Order!]
   order(where: OrderWhereUniqueInput!): Order
   ordersCount(where: OrderWhereInput! = {}): Int
+  customers(where: CustomerWhereInput! = {}, orderBy: [CustomerOrderByInput!]! = [], take: Int, skip: Int! = 0): [Customer!]
+  customer(where: CustomerWhereUniqueInput!): Customer
+  customersCount(where: CustomerWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

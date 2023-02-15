@@ -5,8 +5,9 @@ import { relationship, integer } from '@keystone-6/core/fields';
 export const OrderItem = list({
   access: allowAll,
   fields: {
-    quantity: integer({defaultValue: 0, validation: { isRequired: true } }),
+    quantity: integer({ defaultValue: 0, validation: { isRequired: true } }),
     product: relationship({ ref: 'Book.orderitem' }),
+    customer: relationship({ ref: 'Customer.orderitems' }),
     order: relationship({ ref: 'Order.cart' }),
   },
 });

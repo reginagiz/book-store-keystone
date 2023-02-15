@@ -23,7 +23,7 @@ __export(keystone_exports, {
   default: () => keystone_default
 });
 module.exports = __toCommonJS(keystone_exports);
-var import_core6 = require("@keystone-6/core");
+var import_core7 = require("@keystone-6/core");
 
 // lists/User.ts
 var import_core = require("@keystone-6/core");
@@ -38,7 +38,6 @@ var User = (0, import_core.list)({
       isIndexed: "unique"
     }),
     password: (0, import_fields.password)({ validation: { isRequired: true } }),
-    order: (0, import_fields.relationship)({ ref: "Order.user", many: true }),
     createdAt: (0, import_fields.timestamp)({
       defaultValue: { kind: "now" }
     })
@@ -93,6 +92,7 @@ var OrderItem = (0, import_core4.list)({
   fields: {
     quantity: (0, import_fields4.integer)({ defaultValue: 0, validation: { isRequired: true } }),
     product: (0, import_fields4.relationship)({ ref: "Book.orderitem" }),
+    customer: (0, import_fields4.relationship)({ ref: "Customer.orderitems" }),
     order: (0, import_fields4.relationship)({ ref: "Order.cart" })
   }
 });
@@ -104,8 +104,26 @@ var import_fields5 = require("@keystone-6/core/fields");
 var Order = (0, import_core5.list)({
   access: import_access5.allowAll,
   fields: {
-    user: (0, import_fields5.relationship)({ ref: "User.order" }),
     cart: (0, import_fields5.relationship)({ ref: "OrderItem.order", many: true })
+  }
+});
+
+// lists/Customer.ts
+var import_core6 = require("@keystone-6/core");
+var import_access6 = require("@keystone-6/core/access");
+var import_fields6 = require("@keystone-6/core/fields");
+var Customer = (0, import_core6.list)({
+  access: import_access6.allowAll,
+  fields: {
+    name: (0, import_fields6.text)({ validation: { isRequired: true } }),
+    email: (0, import_fields6.text)({
+      validation: { isRequired: true },
+      isIndexed: "unique"
+    }),
+    orderitems: (0, import_fields6.relationship)({ ref: "OrderItem.customer", many: true }),
+    createdAt: (0, import_fields6.timestamp)({
+      defaultValue: { kind: "now" }
+    })
   }
 });
 
@@ -115,7 +133,8 @@ var lists_default = {
   Book,
   Author,
   OrderItem,
-  Order
+  Order,
+  Customer
 };
 
 // schema.ts
@@ -148,13 +167,13 @@ var session = (0, import_session.statelessSessions)({
 
 // keystone.ts
 var keystone_default = withAuth(
-  (0, import_core6.config)({
+  (0, import_core7.config)({
     db: {
       provider: "sqlite",
       url: "file:./keystone.db"
     },
     server: {
-      cors: { origin: ["http://localhost:3005"], credentials: true },
+      cors: { origin: ["http://localhost:3000"], credentials: true },
       port: 3e3,
       maxFileSize: 200 * 1024 * 1024,
       healthCheck: true
@@ -164,7 +183,7 @@ var keystone_default = withAuth(
       my_local_images: {
         kind: "local",
         type: "image",
-        generateUrl: (path) => `http://localhost:3000/images${path}`,
+        generateUrl: (path) => `http://localhost:3002/images${path}`,
         serverRoute: {
           path: "/images"
         },
