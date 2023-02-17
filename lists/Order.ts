@@ -6,5 +6,7 @@ export const Order = list({
   access: allowAll,
   fields: {
     cart: relationship({ ref: 'OrderItem.order', many: true }),
+    customer: relationship({ ref: 'Customer.orders', many: true }),
+    totalprice: integer({ defaultValue: 0, validation: { isRequired: true } })
   },
 });
