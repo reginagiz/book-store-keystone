@@ -16,6 +16,7 @@ export const Customer = list({
             isIndexed: 'unique',
         }),
         orderitems: relationship({ ref: 'OrderItem.customer', many: true }),
+        orders: relationship({ ref: 'Order.customer', many: true }),
 
         createdAt: timestamp({
             defaultValue: { kind: 'now' },

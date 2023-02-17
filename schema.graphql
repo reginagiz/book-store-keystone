@@ -389,6 +389,9 @@ type Order {
   id: ID!
   cart(where: OrderItemWhereInput! = {}, orderBy: [OrderItemOrderByInput!]! = [], take: Int, skip: Int! = 0): [OrderItem!]
   cartCount(where: OrderItemWhereInput! = {}): Int
+  customer(where: CustomerWhereInput! = {}, orderBy: [CustomerOrderByInput!]! = [], take: Int, skip: Int! = 0): [Customer!]
+  customerCount(where: CustomerWhereInput! = {}): Int
+  totalprice: Int
 }
 
 input OrderWhereUniqueInput {
@@ -401,14 +404,32 @@ input OrderWhereInput {
   NOT: [OrderWhereInput!]
   id: IDFilter
   cart: OrderItemManyRelationFilter
+  customer: CustomerManyRelationFilter
+  totalprice: IntFilter
+}
+
+input CustomerManyRelationFilter {
+  every: CustomerWhereInput
+  some: CustomerWhereInput
+  none: CustomerWhereInput
 }
 
 input OrderOrderByInput {
   id: OrderDirection
+  totalprice: OrderDirection
 }
 
 input OrderUpdateInput {
   cart: OrderItemRelateToManyForUpdateInput
+  customer: CustomerRelateToManyForUpdateInput
+  totalprice: Int
+}
+
+input CustomerRelateToManyForUpdateInput {
+  disconnect: [CustomerWhereUniqueInput!]
+  set: [CustomerWhereUniqueInput!]
+  create: [CustomerCreateInput!]
+  connect: [CustomerWhereUniqueInput!]
 }
 
 input OrderUpdateArgs {
@@ -418,6 +439,13 @@ input OrderUpdateArgs {
 
 input OrderCreateInput {
   cart: OrderItemRelateToManyForCreateInput
+  customer: CustomerRelateToManyForCreateInput
+  totalprice: Int
+}
+
+input CustomerRelateToManyForCreateInput {
+  create: [CustomerCreateInput!]
+  connect: [CustomerWhereUniqueInput!]
 }
 
 type Customer {
@@ -426,6 +454,8 @@ type Customer {
   email: String
   orderitems(where: OrderItemWhereInput! = {}, orderBy: [OrderItemOrderByInput!]! = [], take: Int, skip: Int! = 0): [OrderItem!]
   orderitemsCount(where: OrderItemWhereInput! = {}): Int
+  orders(where: OrderWhereInput! = {}, orderBy: [OrderOrderByInput!]! = [], take: Int, skip: Int! = 0): [Order!]
+  ordersCount(where: OrderWhereInput! = {}): Int
   createdAt: DateTime
 }
 
@@ -442,7 +472,14 @@ input CustomerWhereInput {
   name: StringFilter
   email: StringFilter
   orderitems: OrderItemManyRelationFilter
+  orders: OrderManyRelationFilter
   createdAt: DateTimeNullableFilter
+}
+
+input OrderManyRelationFilter {
+  every: OrderWhereInput
+  some: OrderWhereInput
+  none: OrderWhereInput
 }
 
 input CustomerOrderByInput {
@@ -456,7 +493,15 @@ input CustomerUpdateInput {
   name: String
   email: String
   orderitems: OrderItemRelateToManyForUpdateInput
+  orders: OrderRelateToManyForUpdateInput
   createdAt: DateTime
+}
+
+input OrderRelateToManyForUpdateInput {
+  disconnect: [OrderWhereUniqueInput!]
+  set: [OrderWhereUniqueInput!]
+  create: [OrderCreateInput!]
+  connect: [OrderWhereUniqueInput!]
 }
 
 input CustomerUpdateArgs {
@@ -468,7 +513,13 @@ input CustomerCreateInput {
   name: String
   email: String
   orderitems: OrderItemRelateToManyForCreateInput
+  orders: OrderRelateToManyForCreateInput
   createdAt: DateTime
+}
+
+input OrderRelateToManyForCreateInput {
+  create: [OrderCreateInput!]
+  connect: [OrderWhereUniqueInput!]
 }
 
 """

@@ -104,7 +104,9 @@ var import_fields5 = require("@keystone-6/core/fields");
 var Order = (0, import_core5.list)({
   access: import_access5.allowAll,
   fields: {
-    cart: (0, import_fields5.relationship)({ ref: "OrderItem.order", many: true })
+    cart: (0, import_fields5.relationship)({ ref: "OrderItem.order", many: true }),
+    customer: (0, import_fields5.relationship)({ ref: "Customer.orders", many: true }),
+    totalprice: (0, import_fields5.integer)({ defaultValue: 0, validation: { isRequired: true } })
   }
 });
 
@@ -121,6 +123,7 @@ var Customer = (0, import_core6.list)({
       isIndexed: "unique"
     }),
     orderitems: (0, import_fields6.relationship)({ ref: "OrderItem.customer", many: true }),
+    orders: (0, import_fields6.relationship)({ ref: "Order.customer", many: true }),
     createdAt: (0, import_fields6.timestamp)({
       defaultValue: { kind: "now" }
     })

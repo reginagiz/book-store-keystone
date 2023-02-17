@@ -62,8 +62,10 @@ model OrderItem {
 }
 
 model Order {
-  id   String      @id @default(cuid())
-  cart OrderItem[] @relation("OrderItem_order")
+  id         String      @id @default(cuid())
+  cart       OrderItem[] @relation("OrderItem_order")
+  customer   Customer[]  @relation("Customer_orders")
+  totalprice Int         @default(0)
 }
 
 model Customer {
@@ -71,5 +73,6 @@ model Customer {
   name       String      @default("")
   email      String      @unique @default("")
   orderitems OrderItem[] @relation("OrderItem_customer")
+  orders     Order[]     @relation("Customer_orders")
   createdAt  DateTime?   @default(now())
 }
