@@ -23,7 +23,7 @@ __export(keystone_exports, {
   default: () => keystone_default
 });
 module.exports = __toCommonJS(keystone_exports);
-var import_core7 = require("@keystone-6/core");
+var import_core8 = require("@keystone-6/core");
 
 // lists/User.ts
 var import_core = require("@keystone-6/core");
@@ -93,7 +93,7 @@ var OrderItem = (0, import_core4.list)({
     quantity: (0, import_fields4.integer)({ defaultValue: 0, validation: { isRequired: true } }),
     product: (0, import_fields4.relationship)({ ref: "Book.orderitem" }),
     customer: (0, import_fields4.relationship)({ ref: "Customer.orderitems" }),
-    order: (0, import_fields4.relationship)({ ref: "Order.cart" })
+    order: (0, import_fields4.relationship)({ ref: "Order.cart", many: true })
   }
 });
 
@@ -105,8 +105,12 @@ var Order = (0, import_core5.list)({
   access: import_access5.allowAll,
   fields: {
     cart: (0, import_fields5.relationship)({ ref: "OrderItem.order", many: true }),
-    customer: (0, import_fields5.relationship)({ ref: "Customer.orders", many: true }),
-    totalprice: (0, import_fields5.integer)({ defaultValue: 0, validation: { isRequired: true } })
+    customer: (0, import_fields5.relationship)({ ref: "Customer.orders" }),
+    address: (0, import_fields5.relationship)({ ref: "Address.order" }),
+    totalprice: (0, import_fields5.integer)({ defaultValue: 0, validation: { isRequired: true } }),
+    createdAt: (0, import_fields5.timestamp)({
+      defaultValue: { kind: "now" }
+    })
   }
 });
 
@@ -124,9 +128,27 @@ var Customer = (0, import_core6.list)({
     }),
     orderitems: (0, import_fields6.relationship)({ ref: "OrderItem.customer", many: true }),
     orders: (0, import_fields6.relationship)({ ref: "Order.customer", many: true }),
+    address: (0, import_fields6.relationship)({ ref: "Address.customer", many: true }),
     createdAt: (0, import_fields6.timestamp)({
       defaultValue: { kind: "now" }
     })
+  }
+});
+
+// lists/Address.ts
+var import_core7 = require("@keystone-6/core");
+var import_access7 = require("@keystone-6/core/access");
+var import_fields7 = require("@keystone-6/core/fields");
+var Address = (0, import_core7.list)({
+  access: import_access7.allowAll,
+  fields: {
+    country: (0, import_fields7.text)({ validation: { isRequired: true } }),
+    city: (0, import_fields7.text)({ validation: { isRequired: true } }),
+    street: (0, import_fields7.text)({ validation: { isRequired: true } }),
+    build: (0, import_fields7.text)({ validation: { isRequired: true } }),
+    index: (0, import_fields7.text)({ validation: { isRequired: true } }),
+    customer: (0, import_fields7.relationship)({ ref: "Customer.address" }),
+    order: (0, import_fields7.relationship)({ ref: "Order.address" })
   }
 });
 
@@ -137,7 +159,8 @@ var lists_default = {
   Author,
   OrderItem,
   Order,
-  Customer
+  Customer,
+  Address
 };
 
 // schema.ts
@@ -170,7 +193,7 @@ var session = (0, import_session.statelessSessions)({
 
 // keystone.ts
 var keystone_default = withAuth(
-  (0, import_core7.config)({
+  (0, import_core8.config)({
     db: {
       provider: "sqlite",
       url: "file:./keystone.db"

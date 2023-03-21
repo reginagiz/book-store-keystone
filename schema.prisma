@@ -53,19 +53,22 @@ model OrderItem {
   productId  String?   @map("product")
   customer   Customer? @relation("OrderItem_customer", fields: [customerId], references: [id])
   customerId String?   @map("customer")
-  order      Order?    @relation("OrderItem_order", fields: [orderId], references: [id])
-  orderId    String?   @map("order")
+  order      Order[]   @relation("Order_cart")
 
   @@index([productId])
   @@index([customerId])
-  @@index([orderId])
 }
 
 model Order {
   id         String      @id @default(cuid())
-  cart       OrderItem[] @relation("OrderItem_order")
-  customer   Customer[]  @relation("Customer_orders")
+  cart       OrderItem[] @relation("Order_cart")
+  customer   Customer?   @relation("Order_customer", fields: [customerId], references: [id])
+  customerId String?     @map("customer")
+  address    Address?    @relation("Address_order")
   totalprice Int         @default(0)
+  createdAt  DateTime?   @default(now())
+
+  @@index([customerId])
 }
 
 model Customer {
@@ -73,6 +76,22 @@ model Customer {
   name       String      @default("")
   email      String      @unique @default("")
   orderitems OrderItem[] @relation("OrderItem_customer")
-  orders     Order[]     @relation("Customer_orders")
+  orders     Order[]     @relation("Order_customer")
+  address    Address[]   @relation("Address_customer")
   createdAt  DateTime?   @default(now())
+}
+
+model Address {
+  id         String    @id @default(cuid())
+  country    String    @default("")
+  city       String    @default("")
+  street     String    @default("")
+  build      String    @default("")
+  index      String    @default("")
+  customer   Customer? @relation("Address_customer", fields: [customerId], references: [id])
+  customerId String?   @map("customer")
+  order      Order?    @relation("Address_order", fields: [orderId], references: [id])
+  orderId    String?   @unique @map("order")
+
+  @@index([customerId])
 }

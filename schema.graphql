@@ -310,7 +310,8 @@ type OrderItem {
   quantity: Int
   product: Book
   customer: Customer
-  order: Order
+  order(where: OrderWhereInput! = {}, orderBy: [OrderOrderByInput!]! = [], take: Int, skip: Int! = 0): [Order!]
+  orderCount(where: OrderWhereInput! = {}): Int
 }
 
 input OrderItemWhereUniqueInput {
@@ -325,7 +326,13 @@ input OrderItemWhereInput {
   quantity: IntFilter
   product: BookWhereInput
   customer: CustomerWhereInput
-  order: OrderWhereInput
+  order: OrderManyRelationFilter
+}
+
+input OrderManyRelationFilter {
+  every: OrderWhereInput
+  some: OrderWhereInput
+  none: OrderWhereInput
 }
 
 input OrderItemOrderByInput {
@@ -337,7 +344,7 @@ input OrderItemUpdateInput {
   quantity: Int
   product: BookRelateToOneForUpdateInput
   customer: CustomerRelateToOneForUpdateInput
-  order: OrderRelateToOneForUpdateInput
+  order: OrderRelateToManyForUpdateInput
 }
 
 input BookRelateToOneForUpdateInput {
@@ -352,10 +359,11 @@ input CustomerRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input OrderRelateToOneForUpdateInput {
-  create: OrderCreateInput
-  connect: OrderWhereUniqueInput
-  disconnect: Boolean
+input OrderRelateToManyForUpdateInput {
+  disconnect: [OrderWhereUniqueInput!]
+  set: [OrderWhereUniqueInput!]
+  create: [OrderCreateInput!]
+  connect: [OrderWhereUniqueInput!]
 }
 
 input OrderItemUpdateArgs {
@@ -367,7 +375,7 @@ input OrderItemCreateInput {
   quantity: Int
   product: BookRelateToOneForCreateInput
   customer: CustomerRelateToOneForCreateInput
-  order: OrderRelateToOneForCreateInput
+  order: OrderRelateToManyForCreateInput
 }
 
 input BookRelateToOneForCreateInput {
@@ -380,18 +388,19 @@ input CustomerRelateToOneForCreateInput {
   connect: CustomerWhereUniqueInput
 }
 
-input OrderRelateToOneForCreateInput {
-  create: OrderCreateInput
-  connect: OrderWhereUniqueInput
+input OrderRelateToManyForCreateInput {
+  create: [OrderCreateInput!]
+  connect: [OrderWhereUniqueInput!]
 }
 
 type Order {
   id: ID!
   cart(where: OrderItemWhereInput! = {}, orderBy: [OrderItemOrderByInput!]! = [], take: Int, skip: Int! = 0): [OrderItem!]
   cartCount(where: OrderItemWhereInput! = {}): Int
-  customer(where: CustomerWhereInput! = {}, orderBy: [CustomerOrderByInput!]! = [], take: Int, skip: Int! = 0): [Customer!]
-  customerCount(where: CustomerWhereInput! = {}): Int
+  customer: Customer
+  address: Address
   totalprice: Int
+  createdAt: DateTime
 }
 
 input OrderWhereUniqueInput {
@@ -404,32 +413,30 @@ input OrderWhereInput {
   NOT: [OrderWhereInput!]
   id: IDFilter
   cart: OrderItemManyRelationFilter
-  customer: CustomerManyRelationFilter
+  customer: CustomerWhereInput
+  address: AddressWhereInput
   totalprice: IntFilter
-}
-
-input CustomerManyRelationFilter {
-  every: CustomerWhereInput
-  some: CustomerWhereInput
-  none: CustomerWhereInput
+  createdAt: DateTimeNullableFilter
 }
 
 input OrderOrderByInput {
   id: OrderDirection
   totalprice: OrderDirection
+  createdAt: OrderDirection
 }
 
 input OrderUpdateInput {
   cart: OrderItemRelateToManyForUpdateInput
-  customer: CustomerRelateToManyForUpdateInput
+  customer: CustomerRelateToOneForUpdateInput
+  address: AddressRelateToOneForUpdateInput
   totalprice: Int
+  createdAt: DateTime
 }
 
-input CustomerRelateToManyForUpdateInput {
-  disconnect: [CustomerWhereUniqueInput!]
-  set: [CustomerWhereUniqueInput!]
-  create: [CustomerCreateInput!]
-  connect: [CustomerWhereUniqueInput!]
+input AddressRelateToOneForUpdateInput {
+  create: AddressCreateInput
+  connect: AddressWhereUniqueInput
+  disconnect: Boolean
 }
 
 input OrderUpdateArgs {
@@ -439,13 +446,15 @@ input OrderUpdateArgs {
 
 input OrderCreateInput {
   cart: OrderItemRelateToManyForCreateInput
-  customer: CustomerRelateToManyForCreateInput
+  customer: CustomerRelateToOneForCreateInput
+  address: AddressRelateToOneForCreateInput
   totalprice: Int
+  createdAt: DateTime
 }
 
-input CustomerRelateToManyForCreateInput {
-  create: [CustomerCreateInput!]
-  connect: [CustomerWhereUniqueInput!]
+input AddressRelateToOneForCreateInput {
+  create: AddressCreateInput
+  connect: AddressWhereUniqueInput
 }
 
 type Customer {
@@ -456,6 +465,8 @@ type Customer {
   orderitemsCount(where: OrderItemWhereInput! = {}): Int
   orders(where: OrderWhereInput! = {}, orderBy: [OrderOrderByInput!]! = [], take: Int, skip: Int! = 0): [Order!]
   ordersCount(where: OrderWhereInput! = {}): Int
+  address(where: AddressWhereInput! = {}, orderBy: [AddressOrderByInput!]! = [], take: Int, skip: Int! = 0): [Address!]
+  addressCount(where: AddressWhereInput! = {}): Int
   createdAt: DateTime
 }
 
@@ -473,13 +484,14 @@ input CustomerWhereInput {
   email: StringFilter
   orderitems: OrderItemManyRelationFilter
   orders: OrderManyRelationFilter
+  address: AddressManyRelationFilter
   createdAt: DateTimeNullableFilter
 }
 
-input OrderManyRelationFilter {
-  every: OrderWhereInput
-  some: OrderWhereInput
-  none: OrderWhereInput
+input AddressManyRelationFilter {
+  every: AddressWhereInput
+  some: AddressWhereInput
+  none: AddressWhereInput
 }
 
 input CustomerOrderByInput {
@@ -494,14 +506,15 @@ input CustomerUpdateInput {
   email: String
   orderitems: OrderItemRelateToManyForUpdateInput
   orders: OrderRelateToManyForUpdateInput
+  address: AddressRelateToManyForUpdateInput
   createdAt: DateTime
 }
 
-input OrderRelateToManyForUpdateInput {
-  disconnect: [OrderWhereUniqueInput!]
-  set: [OrderWhereUniqueInput!]
-  create: [OrderCreateInput!]
-  connect: [OrderWhereUniqueInput!]
+input AddressRelateToManyForUpdateInput {
+  disconnect: [AddressWhereUniqueInput!]
+  set: [AddressWhereUniqueInput!]
+  create: [AddressCreateInput!]
+  connect: [AddressWhereUniqueInput!]
 }
 
 input CustomerUpdateArgs {
@@ -514,12 +527,87 @@ input CustomerCreateInput {
   email: String
   orderitems: OrderItemRelateToManyForCreateInput
   orders: OrderRelateToManyForCreateInput
+  address: AddressRelateToManyForCreateInput
   createdAt: DateTime
 }
 
-input OrderRelateToManyForCreateInput {
-  create: [OrderCreateInput!]
-  connect: [OrderWhereUniqueInput!]
+input AddressRelateToManyForCreateInput {
+  create: [AddressCreateInput!]
+  connect: [AddressWhereUniqueInput!]
+}
+
+type Address {
+  id: ID!
+  country: String
+  city: String
+  street: String
+  build: String
+  index: String
+  customer: Customer
+  order: Order
+}
+
+input AddressWhereUniqueInput {
+  id: ID
+}
+
+input AddressWhereInput {
+  AND: [AddressWhereInput!]
+  OR: [AddressWhereInput!]
+  NOT: [AddressWhereInput!]
+  id: IDFilter
+  country: StringFilter
+  city: StringFilter
+  street: StringFilter
+  build: StringFilter
+  index: StringFilter
+  customer: CustomerWhereInput
+  order: OrderWhereInput
+}
+
+input AddressOrderByInput {
+  id: OrderDirection
+  country: OrderDirection
+  city: OrderDirection
+  street: OrderDirection
+  build: OrderDirection
+  index: OrderDirection
+}
+
+input AddressUpdateInput {
+  country: String
+  city: String
+  street: String
+  build: String
+  index: String
+  customer: CustomerRelateToOneForUpdateInput
+  order: OrderRelateToOneForUpdateInput
+}
+
+input OrderRelateToOneForUpdateInput {
+  create: OrderCreateInput
+  connect: OrderWhereUniqueInput
+  disconnect: Boolean
+}
+
+input AddressUpdateArgs {
+  where: AddressWhereUniqueInput!
+  data: AddressUpdateInput!
+}
+
+input AddressCreateInput {
+  country: String
+  city: String
+  street: String
+  build: String
+  index: String
+  customer: CustomerRelateToOneForCreateInput
+  order: OrderRelateToOneForCreateInput
+}
+
+input OrderRelateToOneForCreateInput {
+  create: OrderCreateInput
+  connect: OrderWhereUniqueInput
 }
 
 """
@@ -564,6 +652,12 @@ type Mutation {
   updateCustomers(data: [CustomerUpdateArgs!]!): [Customer]
   deleteCustomer(where: CustomerWhereUniqueInput!): Customer
   deleteCustomers(where: [CustomerWhereUniqueInput!]!): [Customer]
+  createAddress(data: AddressCreateInput!): Address
+  createAddresses(data: [AddressCreateInput!]!): [Address]
+  updateAddress(where: AddressWhereUniqueInput!, data: AddressUpdateInput!): Address
+  updateAddresses(data: [AddressUpdateArgs!]!): [Address]
+  deleteAddress(where: AddressWhereUniqueInput!): Address
+  deleteAddresses(where: [AddressWhereUniqueInput!]!): [Address]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -605,6 +699,9 @@ type Query {
   customers(where: CustomerWhereInput! = {}, orderBy: [CustomerOrderByInput!]! = [], take: Int, skip: Int! = 0): [Customer!]
   customer(where: CustomerWhereUniqueInput!): Customer
   customersCount(where: CustomerWhereInput! = {}): Int
+  addresses(where: AddressWhereInput! = {}, orderBy: [AddressOrderByInput!]! = [], take: Int, skip: Int! = 0): [Address!]
+  address(where: AddressWhereUniqueInput!): Address
+  addressesCount(where: AddressWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

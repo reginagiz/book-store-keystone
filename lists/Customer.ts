@@ -17,6 +17,7 @@ export const Customer = list({
         }),
         orderitems: relationship({ ref: 'OrderItem.customer', many: true }),
         orders: relationship({ ref: 'Order.customer', many: true }),
+        address: relationship({ ref: 'Address.customer', many: true }),
 
         createdAt: timestamp({
             defaultValue: { kind: 'now' },

@@ -8,6 +8,6 @@ export const OrderItem = list({
     quantity: integer({ defaultValue: 0, validation: { isRequired: true } }),
     product: relationship({ ref: 'Book.orderitem' }),
     customer: relationship({ ref: 'Customer.orderitems' }),
-    order: relationship({ ref: 'Order.cart' }),
+    order: relationship({ ref: 'Order.cart', many: true }),
   },
 });

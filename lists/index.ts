@@ -4,6 +4,7 @@ import { Author } from './Author';
 import { OrderItem } from './OrderItem';
 import { Order } from './Order'
 import { Customer } from './Customer'
+import { Address } from './Address';
 
 export default {
   User,
@@ -11,5 +12,6 @@ export default {
   Author,
   OrderItem,
   Order,
-  Customer
+  Customer,
+  Address
 };
